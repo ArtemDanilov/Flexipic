@@ -1,0 +1,19 @@
+{
+    "name": "artemdanilov/flexipic",
+    "autoload": {
+        "psr-4": {
+            "Artemdanilov\\Flexipic\\": "src"
+        }
+    },
+    "extra": {
+        "statamic": {
+            "name": "Flexipic",
+            "description": "Flexipic addon"
+        },
+        "laravel": {
+            "providers": [
+                "Artemdanilov\\Flexipic\\ServiceProvider"
+            ]
+        }
+    }
+}
