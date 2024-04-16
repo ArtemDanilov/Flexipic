@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Tags;
+namespace ArtemDanilov\Flexipic\Tags;
 
 use ErrorException;
 use Statamic\Tags\Tags;
