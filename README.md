@@ -1,23 +1,70 @@
-# Flexipic
+## Flexipic Statamic Addon
 
-> Flexipic is a Statamic addon that does something pretty neat.
+### Overview
 
-## Features
+Flexipic is a Statamic addon designed to effortlessly generate responsive images on-the-fly using Glide and integrate them seamlessly into your Statamic projects using the `picture` tag.
 
-This addon does:
+### Installation
 
-- This
-- And this
-- And even this
+Require it using Composer.
 
-## How to Install
+    composer require artemdanilov/flexipic
+    
+After installation, Flexipic will create the following files:
 
-You can search for this addon in the `Tools > Addons` section of the Statamic control panel and click **install**, or run the following command from your project root:
+ -   **flexipic.php**: This configuration file will be generated in the `config/statamic` directory.
+   
+  -  **output.blade.php**: This file will be created in the `resources/views/vendor/flexipic` directory.
 
-``` bash
-composer require artemdanilov/flexipic
-```
+### Usage
 
-## How to Use
+To enable Flexipic and generate responsive images, simply insert the following line of code wherever you intend to display an image
 
-Here's where you can explain how to use this wonderful addon.
+    {{ flexipic :src="url_to_your_image_asset" }}
+
+### Available parameters
+
+Flexipic supports various parameters that you can include in your tag, each of which will be generated as HTML attributes. However, certain parameters are excluded from generating attributes.
+
+###
+|Parameters|Values|description|
+|--|--|--|
+| quality | `0-100` | Specifies the image quality, which affects file size and compression level |
+| fit | see in [glide documentation](https://glide.thephpleague.com/1.0/api/size/) | Specifies the image quality, which affects file size and compression level |
+| image_sizes | `[...]` | Specifies the sizes of the image in `w`. |
+| placeholder | `blur` or your custom value |Specifies whether a placeholder should be generated for lazy loading purposes |
+
+### Example
+
+    {{ flexipic
+        :src="image"
+        width="320"
+        height="280"
+        image_sizes="[320, 640]"
+        sizes="(min-width: 375px) 320px"
+        loading="lazy"
+        decoding="async"
+        placeholder="blur"
+        class="w-full h-full"
+    }}
+
+### Global parameters
+You also can specife `formats` and global parameters like `image_sizes`, `sizes`, `quality`, `fit`, `loading`, `placeholder` in configuration file.
+
+### Lazyloading
+
+If you set `loading` and `placeholder` parameters for smooth lazyload effect, you should to pass a **JS** function to your `resources/js/site.js` file
+
+    import flexipicLazyload from '../../vendor/artemdanilov/flexipic/dist/flexipicLazyload.min';
+
+    window.addEventListener('DOMContentLoaded', () => {
+        flexipicLazyload('.flexipic');
+    })
+
+### Support
+
+If you encounter any issues or have questions about using Flexipic, please don't hesitate to reach out to me. We're here to help!
+
+### License
+
+Flexipic is licensed under the MIT License. Feel free to use, modify, and distribute it according to your needs.
