@@ -1,51 +1,43 @@
 <?php
 
-namespace ArtemDanilov\Flexipic\Tags;
+namespace Artemdanilov\Flexipic\Tags;
 
 use ErrorException;
 use Statamic\Tags\Tags;
 use Statamic\Statamic;
 use Statamic\Facades\Asset;
+use Artemdanilov\Flexipic\Placeholders\Blurhash;
+use Statamic\Tags\Concerns\RendersAttributes;
 
 class Flexipic extends Tags
 {
-    /**
-     * The {{ flexipic }} tag.
-     *
-     * @return string|array
-     */
+    use RendersAttributes;
+
     public function index()
     {
-        $url = $this->params->get('url');
+        $src = $this->params->get('src');
         $width = $this->params->get('width');
         $height = $this->params->get('height');
-        $alt = $this->params->get('alt');
-        $fit = $this->params->get('fit');
-        $quality = $this->params->get('quality');
-        $sizes = $this->params->get('sizes');
-        $loading = $this->params->get('loading');
-        $placeholder = $this->params->get('placeholder');
 
-        $assets_data = Asset::findByUrl($url ?? $this->context->get('url')->raw());
+        $asset = Asset::findByUrl($src);
+        $isOutsider = strpos($src, 'http') === 0;
 
-        $isOutsider = strpos($url, 'http') === 0;
-
-        if ($isOutsider && (!$width || !$height)) {
+        if ($isOutsider && (!$width = $this->params->get('width') || !$height = $this->params->get('height'))) {
             throw new ErrorException('Error: properties "width" and "height" are invalid or not found.');
-        } elseif (!$isOutsider && !$assets_data) {
-            throw new ErrorException('Error: property "url" is invalid or not found.');
+        } elseif (!$isOutsider && !$asset) {
+            throw new ErrorException('Error: property "src" is invalid or not found.');
         }
 
         $data = [
-            'src' => $url ?? $assets_data->url,
-            'width' => $width ?? $assets_data->width,
-            'height' => $height ?? $assets_data->height,
-            'alt' => $alt ?? ($assets_data->alt ?? ''),
-            'fit' => $fit ?? config('statamic.flexipic.fit'),
-            'quality' => $quality ?? config('statamic.flexipic.quality'),
-            'sizes' => $sizes ?? config('statamic.flexipic.sizes'),
-            'loading' => $loading ?? config('statamic.flexipic.loading'),
-            'placeholder' => $placeholder ?? config('statamic.flexipic.placeholder')
+            'src' => $src ?? $asset->url,
+            'width' => $width ?? $asset->width,
+            'height' => $height ?? $asset->height,
+            'alt' => $this->params->get('alt') ?? ($asset->alt ?? ''),
+            'fit' => $this->params->get('fit') ?? config('statamic.flexipic.fit'),
+            'quality' => $this->params->get('quality') ?? config('statamic.flexipic.quality'),
+            'sizes' => $this->params->get('sizes') ?? config('statamic.flexipic.sizes'),
+            'loading' => $this->params->get('loading') ?? config('statamic.flexipic.loading'),
+            'placeholder' => $this->params->get('placeholder') ?? config('statamic.flexipic.placeholder')
         ];
 
         $data = array_merge($data, $this->params->all());
@@ -55,6 +47,8 @@ class Flexipic extends Tags
 
     public function createPicture($data)
     {
+        $excluded_attrs = ['placeholder', 'fit', 'quality', 'image_sizes', 'sizes'];
+
         $glide = Statamic::tag('glide:generate')
             ->src($data['src'])
             ->width($data['width'])
@@ -62,47 +56,28 @@ class Flexipic extends Tags
             ->fit('crop')
             ->quality($data['quality']);
 
-        $excluded_attrs = ['placeholder', 'fit', 'quality', 'image_sizes', 'sizes'];
-        $attributes = '';
-        
-        foreach ($data as $key => $value) {
-            $is_attr_available = !in_array($key, $excluded_attrs);
+        $filtered_data = array_filter($data, fn($key) => !in_array($key, $excluded_attrs), ARRAY_FILTER_USE_KEY);
 
-            if ($is_attr_available && $value !== '') {
-                if ($key === 'src') {
-                    $value = $glide[0]['url'];
-
-                    if (isset($data['placeholder'])) {
-                        $key = 'data-src';
-                        $attributes .= "decoding='async'";
-                    }
-                }
-
-                $attributes .= "{$key}='{$value}' ";
+        if (isset($data['placeholder'])) {
+            if ($data['placeholder'] === 'blur') {
+                $filtered_data['src'] = $this->createBlurPlaceholder($data);
+            } else {
+                $filtered_data['src'] = $data['placeholder'];
             }
 
-            if ($key === 'placeholder') {
-                if ($value === 'blur') {
-                    $attributes .= "src='{$this->createBlurPlaceholder($data)}' ";
-                } else {
-                    $attributes .= "src='{$data['placeholder']}' ";
-                }
-            }
+            $filtered_data['data-src'] = $glide[0]['url'];
         }
 
-        $attributes = trim($attributes);
-
-        return " 
-            <picture>
-                {$this->generatePictureSources($data)}
-                <img {$attributes} />
-            </picture>
-        ";
+        return view('flexipic::output', [
+            'sources' => $this->generatePictureSources($data),
+            'attributes' => $this->renderAttributes($filtered_data)
+        ])->render();
     }
 
-    private function generatePictureSources($data)
+    protected function generatePictureSources($data)
     {
         $formats = config('statamic.flexipic.formats') ?? ['jpeg'];
+
         $sources = array_map(function ($format) use ($data) {
             $image_sizes = json_decode($data['image_sizes'] ?? '') ?? config('statamic.flexipic.image_sizes');
             
@@ -121,37 +96,27 @@ class Flexipic extends Tags
                 return "{$glide[0]['url']} {$width}w";
             })->implode(", ");
 
-            $srcset = "srcset='$urls'";
-            $placeholder = '';
+            $sources_data = [
+                'type' => "image/$format",
+                'sizes' => $data['sizes']
+            ];
 
             if (isset($data['placeholder'])) {
-                $srcset = "data-srcset='$urls'";
-
-                if ($data['placeholder'] === 'blur') {
-                    $placeholder = 'srcset=' . $this->createBlurPlaceholder($data);
-                }
+                $sources_data['data-srcset'] = $urls;
+            } else {
+                $sources_data['srcset'] = $urls;
             }
 
-            return "<source $srcset $placeholder type='image/$format' sizes='{$data['sizes']}' />";
+            return $this->renderAttributes($sources_data);
         }, $formats);
 
-        return implode("", $sources);
+        return $sources;
     }
 
-    private function createBlurPlaceholder($source)
+    protected function createBlurPlaceholder($source)
     {
-        $width = 16;
-        $height = round(($width * $source['height']) / $source['width']);
+        $blurhash = new Blurhash($source['src']);
 
-        $glide = Statamic::tag('glide:generate')
-            ->src($source['src'])
-            ->width($width)
-            ->height($height)
-            ->blur(8)
-            ->format('jpeg')
-            ->fit($source['fit'])
-            ->quality(60);
-
-        return $glide[0]['url'];
+        return 'data:image/png;base64,' . base64_encode($blurhash->create());
     }
 }

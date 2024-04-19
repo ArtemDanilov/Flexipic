@@ -24,8 +24,14 @@ class ServiceProvider extends AddonServiceProvider
     {
         $this->mergeConfigFrom(__DIR__.'/../config/flexipic.php', 'statamic.flexipic');
 
+        if (!file_exists(config_path('statamic/flexipic.php'))) {
+            $this->publishes([
+                __DIR__.'/../config/flexipic.php' => config_path('statamic/flexipic.php'),
+            ], 'flexipic');
+        }
+
         $this->publishes([
-            __DIR__.'/../config/flexipic.php' => config_path('statamic/flexipic.php'),
+            __DIR__.'/../resources/views' => base_path('resources/views/vendor/flexipic'),
         ], 'flexipic');
 
         return $this;
