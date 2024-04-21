@@ -22,16 +22,10 @@ class ServiceProvider extends AddonServiceProvider
 
     protected function bootAddonConfig(): self
     {
-        $this->mergeConfigFrom(__DIR__.'/../config/flexipic.php', 'statamic.flexipic');
-
-        if (!file_exists(config_path('statamic/flexipic.php'))) {
-            $this->publishes([
-                __DIR__.'/../config/flexipic.php' => config_path('statamic/flexipic.php'),
-            ], 'flexipic');
-        }
+        $this->mergeConfigFrom(__DIR__ . '/../config/flexipic.php', 'statamic.flexipic');
 
         $this->publishes([
-            __DIR__.'/../resources/views' => base_path('resources/views/vendor/flexipic'),
+            __DIR__ . '/../config/flexipic.php' => config_path('statamic/flexipic.php'),
         ], 'flexipic');
 
         return $this;
