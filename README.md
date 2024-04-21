@@ -13,8 +13,6 @@ Require it using Composer.
 After installation, Flexipic will create the following files:
 
  -   **flexipic.php**: This configuration file will be generated in the `config/statamic` directory.
-   
-  -  **output.blade.php**: This file will be created in the `resources/views/vendor/flexipic` directory.
 
 ### Usage
 
@@ -29,10 +27,10 @@ Flexipic supports various parameters that you can include in your tag, each of w
 ###
 |Parameters|Values|description|
 |--|--|--|
-| quality | `0-100` | Specifies the image quality, which affects file size and compression level |
-| fit | see in [glide documentation](https://glide.thephpleague.com/1.0/api/size/) | Specifies the image quality, which affects file size and compression level |
-| image_sizes | `[...]` | Specifies the sizes of the image in `w`. |
-| placeholder | `blur` or your custom value |Specifies whether a placeholder should be generated for lazy loading purposes |
+| quality | 0-100 | Specifies the image quality, which affects file size and compression level |
+| fit | contain, max, fill, fill-max, stretch, crop, crop-focal | Sets how the image is fitted to its target dimensions |
+| image_sizes | [375, 480, 640, ...] | Specifies the sizes of the image in `w`. |
+| placeholder | "blur" or your custom value |Specifies whether a placeholder should be generated for lazy loading purposes |
 
 ### Example
 
@@ -63,7 +61,7 @@ If you set `loading` and `placeholder` parameters for smooth lazyload effect, yo
 
 ### Support
 
-If you encounter any issues or have questions about using Flexipic, please don't hesitate to reach out to me. We're here to help!
+If you encounter any issues or have questions about using Flexipic, please don't hesitate to reach out to me artemdanilow@gmail.com
 
 ### License
 
