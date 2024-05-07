@@ -43,13 +43,12 @@ The tag will set a height of **400px** for the first value from the `width` arra
 
 Of course, there are more parameters you can use inside.
 
-:::tip If your image URL is from an external source, you need to specify a height. :::
+**!** If your image URL is from an external source, you need to specify a height. **!**
 
 ### Available parameters
 
-Flexipic supports various parameters that you can include in your tag, each of which will be generated as HTML attributes. However, certain parameters are excluded from generating attributes, like `quality`, `fit` or `placeholder`
+Flexipic supports various parameters that you can include in your tag, each of which will be generated as HTML attributes. However, certain parameters are excluded from generating attributes, like `quality`, `fit` or `placeholder`.
 
-###
 |Parameters|Values|description|
 |--|--|--|
 | `src` | url or path | Specifies the source URL or path of the image |
@@ -59,8 +58,9 @@ Flexipic supports various parameters that you can include in your tag, each of w
 | `quality` | 0-100 | Specifies the image quality, which affects file size and compression level |
 | `fit` | contain, max, fill, fill-max, stretch, crop, crop-focal | Sets how the image is fitted to its target dimensions |
 | `loading` | eager or lazy | Specifies whether the image should be loaded immediately (eager) or lazily (lazy). |
-| `placeholder` | "blur" or your custom value | Specifies whether a placeholder should be generated for lazy loading purposes |
+| `placeholder` | "blur", "false" or your custom value | Specifies whether a placeholder should be generated for lazy loading purposes |
 | `class` | string of classes | Specifies additional CSS classes to apply to the image element. |
+| `wrapper_class` | string of classes | Specifies additional CSS classes to apply to the picture element. |
 
 ### Lazyloading
 
