@@ -60,13 +60,14 @@ class Flexipic extends Tags
 
         return view('flexipic::output', [
             'sources' => array_map(fn ($source) => $this->renderAttributes($source), $sources_attrs),
-            'attributes' => $this->renderAttributes($image_attrs)
+            'attributes' => $this->renderAttributes($image_attrs),
+            'wrapper_class' => $this->getParam('wrapper_class') ?? ''
         ])->render();
     }
 
     public function generateImgAttributes($sources, $data)
     {
-        $excluded_attrs = ['placeholder', 'fit', 'quality', 'width', 'sizes'];
+        $excluded_attrs = ['placeholder', 'fit', 'quality', 'width', 'sizes', 'wrapper_class'];
         $attrs = $this->removeAttributes($data, $excluded_attrs);
 
         $index = $this->getIndexFromArray($data['width']);
@@ -78,7 +79,7 @@ class Flexipic extends Tags
 
         $placeholder = $this->getParam('placeholder');
 
-        if (isset($placeholder)) {
+        if (isset($placeholder) && $placeholder !== false) {
             $attrs['src'] = ($placeholder === 'blur') ? $this->createBlurPlaceholder($data['src']) : $placeholder;
             $attrs['data-src'] = $source_image['url'];
         }
