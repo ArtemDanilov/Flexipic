@@ -20,16 +20,18 @@ class Flexipic extends Tags
      */
     public function index()
     {
-        $src = $this->getParam('src');
+        $src = $this->getParam('src') ?? '';
+
+        if (!$src) {
+            return '';
+        }
+
         $width = $this->getParam('width', [480, 768, 1024]);
         $height = $this->getParam('height');
 
         $asset = Asset::findByUrl($src);
         $isOutsider = strpos($src, 'http') === 0;
 
-        if (!$src) {
-            throw new ErrorException('Error: property "src" is invalid or not found.');
-        }
         if ($isOutsider && !$height) {
             throw new ErrorException('Error: property "height" is invalid or not found.');
         }
@@ -160,12 +162,13 @@ class Flexipic extends Tags
 
     protected function calculateHeight($size)
     {
-        $_SRC = Asset::findByUrl($this->getParam('src'));
+        $asset = Asset::findByUrl($this->getParam('src'));
+
         $_WIDTH = $this->getParam('width');
         $_HEIGHT = $this->getParam('height');
 
-        $width = $_HEIGHT ? $_WIDTH[0] : $_SRC->width;
-        $height = $_HEIGHT ?? $_SRC->height;
+        $width = $_HEIGHT ? $_WIDTH[0] : $asset->width;
+        $height = $_HEIGHT ?? $asset->height;
 
         $aspect_ratio = $height / $width;
 
