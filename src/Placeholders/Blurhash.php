@@ -38,6 +38,14 @@ class Blurhash
     {
         $image = BlurHashFacade::decode($encodedString, $this->width, $this->height);
         
-        return $image->encode('jpg', 90);
+        $tempFile = tempnam(sys_get_temp_dir(), 'img');
+        
+        imagejpeg($image, $tempFile, 90);
+        
+        $imageContents = file_get_contents($tempFile);
+        
+        unlink($tempFile);
+        
+        return $imageContents;
     }
 }
